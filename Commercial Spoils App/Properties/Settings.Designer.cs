@@ -79,5 +79,16 @@ namespace Commercial_Spoils_App.Properties {
                 return ((bool)(this["DtrEnable"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=KH288\\SQLEXPRESS;Initial Catalog=AdventureWorks2014;Integrated Securi" +
+            "ty=True")]
+        public string AdventureWorks2014ConnectionString {
+            get {
+                return ((string)(this["AdventureWorks2014ConnectionString"]));
+            }
+        }
     }
 }

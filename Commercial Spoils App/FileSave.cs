@@ -7,11 +7,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Outlook = Microsoft.Office.Interop.Outlook;
+
 
 namespace Commercial_Spoils_App
 {
     class FileSave
     {
+        internal static void SendEmail_Outlook(string fileName)
+        {
+            try
+            {
+                Outlook.Application oApp = new Outlook.Application();
+
+                Outlook.MailItem oMsg = (Outlook.MailItem)oApp.CreateItem(Outlook.OlItemType.olMailItem);
+
+                //email body goes here
+                oMsg.HTMLBody = "Please process spoil file " + fileName;
+
+                ////Add attachement
+                //string sDisplayName = string.Empty;
+                //int iPosition = (int)oMsg.Body.Length + 1;
+                //int iAttachType = (int)Outlook.OlAttachmentType.olByValue;
+                ////Attach File
+                //Outlook.Attachment oAttach = oMsg.Attachments.Add(@"path", iAttachType, iPosition, sDisplayName);
+
+                //Subject Line
+                oMsg.Subject = fileName + "  is ready for processing.";
+
+                //Add Recipients
+                Outlook.Recipients oRecips = oMsg.Recipients;
+                //Change Recipient in next line
+                Outlook.Recipient oRecip = oRecips.Add("jelder@khprint.com");
+
+                //Send Message
+                oMsg.Send();
+
+                //Clean up
+                oRecip = null;
+                oRecips = null;
+                oMsg = null;
+                oApp = null;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
         public static DataTable SortAscending(string columnName, DataTable dt)
         {
             DataTable dtAsc = dt.Clone();
@@ -56,7 +101,7 @@ namespace Commercial_Spoils_App
             return newFilename;
         }
 
-        public static string AddSuffix(string filename, string suffix)
+        private static string AddSuffix(string filename, string suffix)
         {
             string fDir = Path.GetDirectoryName(filename);
             string fName = Path.GetFileNameWithoutExtension(filename);
@@ -94,5 +139,6 @@ namespace Commercial_Spoils_App
             //Datatable which contains unique records will be return as output.
             return dTable;
         }
+
     }
 }
