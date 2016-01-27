@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,53 +19,35 @@ namespace Commercial_Spoils_App
         {
             try
             {
-                Outlook.Application oApp = new Outlook.Application();
+                string to = "DPGroup@khprint.com";
+                string from = "jelder@khprint.com";
 
-                Outlook.MailItem oMsg = (Outlook.MailItem)oApp.CreateItem(Outlook.OlItemType.olMailItem);
+                MailMessage message = new MailMessage(from, to);
 
+                message.CC.Add("MailRoomGrp@khprint.com");
+                message.CC.Add("DigitalGrp@khprint.com");
+
+                string server = "mail.khprint.com";
+                SmtpClient client = new SmtpClient(server);
+
+                //Subject Line
+                message.Subject = fi.Name + "  is ready for processing.";
 
                 if (newMailing)
                 {
                     //email body goes here
-                    oMsg.HTMLBody = "Please process file: " + fi.Name +
-                                    "\n as a NEW MAILING \nLocated at:  " + "\n" + fi.Directory;
+                    message.Body = "Please process file: " + fi.Name +
+                                    " as a NEW MAILING Located at:  " + fi.Directory;
                 }
                 else
                 {
                     //email body goes here
-                    oMsg.HTMLBody = "Please process file: " + fi.Name +
-                                    "\n for REPRINTING \nLocated at:  " + "\n" + fi.Directory;
+                    message.Body = "Please process file: " + fi.Name +
+                                    " for REPRINTING Located at:  " + fi.Directory;
                 }
 
-                ////Add attachement
-                //string sDisplayName = string.Empty;
-                //int iPosition = (int)oMsg.Body.Length + 1;
-                //int iAttachType = (int)Outlook.OlAttachmentType.olByValue;
-                ////Attach File
-                //Outlook.Attachment oAttach = oMsg.Attachments.Add(@"path", iAttachType, iPosition, sDisplayName);
-
-                //Subject Line
-                oMsg.Subject = fi.Name + "  is ready for processing.";
-
-                ////Add Recipients
-                //Outlook.Recipients oRecips = oMsg.Recipients;
-                ////Change Recipient in next line
-                //Outlook.Recipient oRecip = oRecips.Add("jelder@khprint.com");
-
-                oMsg.To = "jelder@khprint.com";
-
-                //oMsg.To = "DPGroup@khprint.com";
-                //oMsg.CC = "DigitalGrp@khprint.com";
-
-                //Send Message
-                oMsg.Send();
-                
-
-                ////Clean up
-                //oRecip = null;
-                //oRecips = null;
-                oMsg = null;
-                oApp = null;
+                client.UseDefaultCredentials = true;
+                client.Send(message);
 
             }
             catch (Exception ex)
