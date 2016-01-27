@@ -14,7 +14,7 @@ namespace Commercial_Spoils_App
 {
     class FileSave
     {
-        internal static void SendEmail_Outlook(string fileName)
+        internal static void SendEmail_Outlook(FileInfo fi, bool newMailing)
         {
             try
             {
@@ -22,8 +22,19 @@ namespace Commercial_Spoils_App
 
                 Outlook.MailItem oMsg = (Outlook.MailItem)oApp.CreateItem(Outlook.OlItemType.olMailItem);
 
-                //email body goes here
-                oMsg.HTMLBody = "Please process spoil file " + fileName;
+
+                if (newMailing)
+                {
+                    //email body goes here
+                    oMsg.HTMLBody = "Please process file: " + fi.Name +
+                                    "\n as a NEW MAILING \nLocated at:  " + "\n" + fi.Directory;
+                }
+                else
+                {
+                    //email body goes here
+                    oMsg.HTMLBody = "Please process file: " + fi.Name +
+                                    "\n for REPRINTING \nLocated at:  " + "\n" + fi.Directory;
+                }
 
                 ////Add attachement
                 //string sDisplayName = string.Empty;
@@ -33,19 +44,25 @@ namespace Commercial_Spoils_App
                 //Outlook.Attachment oAttach = oMsg.Attachments.Add(@"path", iAttachType, iPosition, sDisplayName);
 
                 //Subject Line
-                oMsg.Subject = fileName + "  is ready for processing.";
+                oMsg.Subject = fi.Name + "  is ready for processing.";
 
-                //Add Recipients
-                Outlook.Recipients oRecips = oMsg.Recipients;
-                //Change Recipient in next line
-                Outlook.Recipient oRecip = oRecips.Add("jelder@khprint.com");
+                ////Add Recipients
+                //Outlook.Recipients oRecips = oMsg.Recipients;
+                ////Change Recipient in next line
+                //Outlook.Recipient oRecip = oRecips.Add("jelder@khprint.com");
+
+                oMsg.To = "jelder@khprint.com";
+
+                //oMsg.To = "DPGroup@khprint.com";
+                //oMsg.CC = "DigitalGrp@khprint.com";
 
                 //Send Message
                 oMsg.Send();
+                
 
-                //Clean up
-                oRecip = null;
-                oRecips = null;
+                ////Clean up
+                //oRecip = null;
+                //oRecips = null;
                 oMsg = null;
                 oApp = null;
 
