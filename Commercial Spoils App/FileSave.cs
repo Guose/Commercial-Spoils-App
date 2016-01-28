@@ -19,13 +19,13 @@ namespace Commercial_Spoils_App
         {
             try
             {
-                string to = "DPGroup@khprint.com";
+                //string to = "DigitalGrp@khprint.com";
+                string to = "jelder@khprint.com";
                 string from = "jelder@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
 
-                message.CC.Add("MailRoomGrp@khprint.com");
-                message.CC.Add("DigitalGrp@khprint.com");
+                //message.CC.Add("MailRoomGrp@khprint.com");
 
                 string server = "mail.khprint.com";
                 SmtpClient client = new SmtpClient(server);
@@ -35,15 +35,18 @@ namespace Commercial_Spoils_App
 
                 if (newMailing)
                 {
+                    //message.To.Add("DPGroup@khprint.com");
+                    message.To.Add("guose79@gmail.com");
+
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
-                                    " as a NEW MAILING Located at:  " + fi.Directory;
+                                    " as a NEW MAILING Located at:  \n" + fi.Directory;
                 }
                 else
                 {
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
-                                    " for REPRINTING Located at:  " + fi.Directory;
+                                    " for REPRINTING Located at:  \n" + fi.Directory;
                 }
 
                 client.UseDefaultCredentials = true;
