@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Net.Mail;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using Outlook = Microsoft.Office.Interop.Outlook;
 
 
 namespace Commercial_Spoils_App
@@ -19,13 +15,13 @@ namespace Commercial_Spoils_App
         {
             try
             {
-                //string to = "DigitalGrp@khprint.com";
-                string to = "jelder@khprint.com";
+                string to = "DigitalGrp@khprint.com";
+                //string to = "jelder@khprint.com";
                 string from = "jelder@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
 
-                //message.CC.Add("MailRoomGrp@khprint.com");
+                message.CC.Add("MailRoomGrp@khprint.com");
 
                 string server = "mail.khprint.com";
                 SmtpClient client = new SmtpClient(server);
@@ -35,8 +31,8 @@ namespace Commercial_Spoils_App
 
                 if (newMailing)
                 {
-                    //message.To.Add("DPGroup@khprint.com");
-                    message.To.Add("guose79@gmail.com");
+                    message.To.Add("DPGroup@khprint.com");
+                    //message.To.Add("guose79@gmail.com");
 
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
