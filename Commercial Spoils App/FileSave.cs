@@ -11,23 +11,24 @@ namespace Commercial_Spoils_App
 {
     class FileSave
     {
-        internal static void SendEmail_Outlook(FileInfo fi, bool newMailing)
+        internal static void SendEmail_Outlook(FileInfo fi, bool newMailing, int recordCount)
         {
             try
             {
-                string to = "DigitalGrp@khprint.com";
-                //string to = "jelder@khprint.com";
+                //string to = "DigitalGrp@khprint.com";
+                string to = "jelder@khprint.com";
                 string from = "jelder@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
 
-                message.CC.Add("MailRoomGrp@khprint.com");
+                //message.CC.Add("MailRoomGrp@khprint.com");
 
                 string server = "mail.khprint.com";
                 SmtpClient client = new SmtpClient(server);
 
                 //Subject Line
                 message.Subject = fi.Name + "  is ready for processing.";
+                               
 
                 if (newMailing)
                 {
@@ -36,13 +37,15 @@ namespace Commercial_Spoils_App
 
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
-                                    " as a NEW MAILING Located at:  \n" + fi.Directory;
+                        "\nRecord Count: " + recordCount + 
+                        "\nAs a NEW MAILING \nLocated at: " + fi.Directory;
                 }
                 else
                 {
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
-                                    " for REPRINTING Located at:  \n" + fi.Directory;
+                        "\nRecord Count: " + recordCount + 
+                        "\nFor REPRINTING \nLocated at: " + fi.Directory;
                 }
 
                 client.UseDefaultCredentials = true;
