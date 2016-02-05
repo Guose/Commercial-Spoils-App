@@ -144,6 +144,7 @@
     <None Include="Properties\DataSources\Commercial_Spoils_App.Properties.Settings.datasource" />
     <None Include="Properties\DataSources\ComPort.ComPortInfo.datasource" />
     <None Include="Properties\DataSources\ComPort.datasource" />
+    <None Include="Properties\DataSources\ExcelFile.datasource" />
     <None Include="Properties\DataSources\FileSave.datasource" />
     <None Include="Properties\DataSources\Helper.datasource" />
     <None Include="Properties\DataSources\MainWindow.datasource" />

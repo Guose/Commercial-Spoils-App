@@ -84,7 +84,7 @@ namespace Commercial_Spoils_App
             dlg.Filter = "Text documents (.txt)|*.txt";
 
             string filename = dlg.FileName;
-            string newFilename = AddSuffix(path, string.Format(filename));
+            string newFilename = AddSuffix(path, ".txt");     //string.Format(filename));
 
             var result = new StringBuilder();
             foreach (DataRow row in table.Rows)
@@ -103,11 +103,11 @@ namespace Commercial_Spoils_App
             return newFilename;
         }
 
-        private static string AddSuffix(string filename, string suffix)
+        public static string AddSuffix(string filename, string suffix)
         {
             string fDir = Path.GetDirectoryName(filename);
             string fName = Path.GetFileNameWithoutExtension(filename);
-            string fExt = Path.GetExtension(filename);
+            string fExt = suffix; //Path.GetExtension(filename);
             int n = 1;
             string spoils = "_SPOILS";
             do
@@ -133,7 +133,9 @@ namespace Commercial_Spoils_App
             }
             //Removing a list of duplicate items from datatable.
             foreach (DataRow dRow in duplicateList)
+            {
                 dTable.Rows.Remove(dRow);
+            }
             if (duplicateList.Count > 0)
             {
                 MessageBox.Show(duplicateList.Count + " Duplicate(s) have been removed.");
