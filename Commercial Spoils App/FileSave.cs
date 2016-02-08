@@ -15,14 +15,13 @@ namespace Commercial_Spoils_App
         {
             try
             {
-                //string to = "DigitalGrp@khprint.com";
-                string to = "jelder@khprint.com";
+                string to = "DigitalGrp@khprint.com";
+                //string to = "jelder@khprint.com";
                 string from = "jelder@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
 
-                //message.CC.Add("MailRoomGrp@khprint.com");
-
+                message.CC.Add("MailRoomGrp@khprint.com");
                 string server = "mail.khprint.com";
                 SmtpClient client = new SmtpClient(server);
 
@@ -84,7 +83,7 @@ namespace Commercial_Spoils_App
             dlg.Filter = "Text documents (.txt)|*.txt";
 
             string filename = dlg.FileName;
-            string newFilename = AddSuffix(path, ".txt");     //string.Format(filename));
+            string newFilename = AddSuffix(path, ".txt", true);     //string.Format(filename));
 
             var result = new StringBuilder();
             foreach (DataRow row in table.Rows)
@@ -103,18 +102,27 @@ namespace Commercial_Spoils_App
             return newFilename;
         }
 
-        public static string AddSuffix(string filename, string suffix)
+        public static string AddSuffix(string filename, string suffix, bool newFileCreated)
         {
+            
             string fDir = Path.GetDirectoryName(filename);
             string fName = Path.GetFileNameWithoutExtension(filename);
             string fExt = suffix; //Path.GetExtension(filename);
             int n = 1;
             string spoils = "_SPOILS";
-            do
+
+            if (newFileCreated)
+            {
+                do
+                {
+                    filename = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
+                }
+                while (File.Exists(filename));
+            }
+            else
             {
                 filename = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
             }
-            while (File.Exists(filename));
             return filename;
         }
 

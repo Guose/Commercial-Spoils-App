@@ -17,6 +17,16 @@ namespace Commercial_Spoils_App
             set { rowNumber = value; }
         }
 
+        private bool firstFileCreated;
+
+        public bool FirstFileCreated
+        {
+            get { return firstFileCreated; }
+            set { firstFileCreated = value; }
+        }
+
+
+
         private string path;
 
         public string Path
@@ -62,6 +72,7 @@ namespace Commercial_Spoils_App
 
         public void CreateExcelFile()
         {
+
             try
             {
                 xclFile = new Excel.Application();
@@ -73,8 +84,18 @@ namespace Commercial_Spoils_App
                 xclSheet.Cells[1, 1] = "Starting Number";
                 xclSheet.Cells[1, 2] = "Ending Number";
                 xclSheet.Cells[1, 3] = "Quantity";
+                firstFileCreated = true;                
 
-                xclWBook.SaveAs(GetNewPathName(), Excel.XlFileFormat.xlWorkbookNormal, missingValue, missingValue, missingValue, missingValue, Excel.XlSaveAsAccessMode.xlExclusive, missingValue, missingValue, missingValue, missingValue, missingValue);
+                xclWBook.SaveAs(GetNewPathName(), Excel.XlFileFormat.xlWorkbookNormal, missingValue, missingValue, missingValue, missingValue, 
+                    Excel.XlSaveAsAccessMode.xlExclusive, missingValue, missingValue, missingValue, missingValue, missingValue);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
                 xclWBook.Close(true, missingValue, missingValue);
                 xclFile.Quit();
 
@@ -82,81 +103,105 @@ namespace Commercial_Spoils_App
                 ReleaseObject(xclSheet);
                 ReleaseObject(xclWBook);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
         }
 
         internal string GetNewPathName()
         {
-            FileInfo fi = new FileInfo(path);
+            if (excelFileName == string.Empty)
+            {
+                excelFileName = FileSave.AddSuffix(path, ".xls", firstFileCreated);
+            }
+                        
+            FileInfo fi = new FileInfo(excelFileName);
 
-            excelFileName = FileSave.AddSuffix(path, ".xls");
-            return excelFileName;
-            //return fi.Directory.ToString() + "\\" + excelFileName;
+            return fi.Directory.ToString() + "\\" + fi.Name;
         }
 
 
-        public void OpenExcelFile(string path)
+        internal void OpenExcelFile(long first, long last)
         {
+            FirstNumber = first;
+            LastNumber = last;
+            firstFileCreated = false;
+
             xclFile = null;
             xclFile = new Excel.Application(); //create Excel App
             xclFile.DisplayAlerts = false; //turn off alerts
-            Path = path;
+
+            Path = GetNewPathName();                       
 
             try
             {
-                xclWBook = xclFile.Workbooks.Open(GetNewPathName(), missingValue, missingValue, missingValue, missingValue, missingValue, missingValue, missingValue, 
-                    missingValue, missingValue, missingValue, missingValue, missingValue, missingValue, missingValue); //open existing excel file
+                xclWBook = xclFile.Workbooks._Open(Path, missingValue, missingValue, missingValue, missingValue, missingValue, 
+                    missingValue, missingValue, missingValue, missingValue, missingValue, missingValue, missingValue);
 
                 xclSheet = xclWBook.Worksheets[1];
+
+                AddDataToExcel(FirstNumber, LastNumber);
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+            finally
+            {
+                xclWBook.Close(true, missingValue, missingValue);
+                xclFile.Quit();
+
+                ReleaseObject(xclFile);
+                ReleaseObject(xclSheet);
+                ReleaseObject(xclWBook);
+            }
 
         }
 
-        public void AddDataToExcel(long firstNum, long ?lastNum)
+        private void AddDataToExcel(long firstNum, long lastNum)
         {
-            if (lastNum > 0)
+            long count = 1;
+
+            if (firstNum < lastNum)
             {
                 xclSheet.Cells[rowNumber, 1] = firstNum.ToString();
                 xclSheet.Cells[rowNumber, 2] = lastNum.ToString();
+                count = lastNum - firstNum;
+                xclSheet.Cells[rowNumber, 3] = count.ToString();
             }
             else
             {
                 xclSheet.Cells[rowNumber, 1] = firstNum.ToString();
+                xclSheet.Cells[rowNumber, 3] = count.ToString();
             }
             rowNumber++;
         }
 
-        public void CloseExcelFile(string path)
+        private void CloseExcelFile()
         {
-            Path = path;
+            Path = GetNewPathName();
+            firstFileCreated = false;
             try
             {
                 string format = xclFile.DefaultSaveFormat.ToString();
 
-                xclWBook.SaveAs(GetNewPathName(), Excel.XlFileFormat.xlWorkbookNormal, missingValue, missingValue, missingValue, missingValue, 
+                xclWBook.SaveAs(Path, Excel.XlFileFormat.xlWorkbookNormal, missingValue, missingValue, missingValue, missingValue, 
                     Excel.XlSaveAsAccessMode.xlExclusive, missingValue, missingValue, missingValue, missingValue, missingValue);
 
-                xclWBook.Close(true, path, missingValue);
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                xclFile.Quit();
             }
 
             finally
             {
                 if (xclFile != null)
                 {
+                    xclWBook.Close(true, path, missingValue);
                     xclFile.Quit();
                     ReleaseObject(xclFile);
+                    ReleaseObject(xclSheet);
+                    ReleaseObject(xclWBook);
                 }
             }
         }
