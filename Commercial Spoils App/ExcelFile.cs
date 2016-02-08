@@ -25,8 +25,6 @@ namespace Commercial_Spoils_App
             set { firstFileCreated = value; }
         }
 
-
-
         private string path;
 
         public string Path
@@ -68,11 +66,11 @@ namespace Commercial_Spoils_App
         private Excel.Workbook xclWBook;
         private Excel.Worksheet xclSheet;
         private string excelFileName = string.Empty;
+        private string fileExists = string.Empty;
 
 
-        public void CreateExcelFile()
+        internal void CreateExcelFile()
         {
-
             try
             {
                 xclFile = new Excel.Application();
@@ -96,16 +94,27 @@ namespace Commercial_Spoils_App
             }
             finally
             {
-                xclWBook.Close(true, missingValue, missingValue);
-                xclFile.Quit();
-
-                ReleaseObject(xclFile);
-                ReleaseObject(xclSheet);
-                ReleaseObject(xclWBook);
+                fileExists = FileSave.AddSuffix(path, ".txt", true);
+                CloseExcelFile();
             }
         }
 
-        internal string GetNewPathName()
+        internal void DeleteExcelFile()
+        {
+            if (!File.Exists(fileExists))
+            {
+                if (excelFileName != string.Empty)
+                {
+                    ReleaseObject(xclFile);
+                    ReleaseObject(xclSheet);
+                    ReleaseObject(xclWBook);
+
+                    File.Delete(excelFileName);
+                }
+            }
+        }
+
+        private string GetNewPathName()
         {
             if (excelFileName == string.Empty)
             {
@@ -146,12 +155,7 @@ namespace Commercial_Spoils_App
             }
             finally
             {
-                xclWBook.Close(true, missingValue, missingValue);
-                xclFile.Quit();
-
-                ReleaseObject(xclFile);
-                ReleaseObject(xclSheet);
-                ReleaseObject(xclWBook);
+                CloseExcelFile();
             }
 
         }
@@ -164,7 +168,7 @@ namespace Commercial_Spoils_App
             {
                 xclSheet.Cells[rowNumber, 1] = firstNum.ToString();
                 xclSheet.Cells[rowNumber, 2] = lastNum.ToString();
-                count = lastNum - firstNum;
+                count = lastNum - firstNum +1;
                 xclSheet.Cells[rowNumber, 3] = count.ToString();
             }
             else
@@ -177,24 +181,6 @@ namespace Commercial_Spoils_App
 
         private void CloseExcelFile()
         {
-            Path = GetNewPathName();
-            firstFileCreated = false;
-            try
-            {
-                string format = xclFile.DefaultSaveFormat.ToString();
-
-                xclWBook.SaveAs(Path, Excel.XlFileFormat.xlWorkbookNormal, missingValue, missingValue, missingValue, missingValue, 
-                    Excel.XlSaveAsAccessMode.xlExclusive, missingValue, missingValue, missingValue, missingValue, missingValue);
-
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-            finally
-            {
                 if (xclFile != null)
                 {
                     xclWBook.Close(true, path, missingValue);
@@ -202,8 +188,7 @@ namespace Commercial_Spoils_App
                     ReleaseObject(xclFile);
                     ReleaseObject(xclSheet);
                     ReleaseObject(xclWBook);
-                }
-            }
+                }            
         }
 
         private void ReleaseObject(object obj)

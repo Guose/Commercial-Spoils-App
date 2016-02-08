@@ -16,7 +16,6 @@ namespace Commercial_Spoils_App
             try
             {
                 string to = "DigitalGrp@khprint.com";
-                //string to = "jelder@khprint.com";
                 string from = "jelder@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
@@ -32,7 +31,6 @@ namespace Commercial_Spoils_App
                 if (newMailing)
                 {
                     message.To.Add("DPGroup@khprint.com");
-                    //message.To.Add("guose79@gmail.com");
 
                     //email body goes here
                     message.Body = "Please process file: " + fi.Name +
