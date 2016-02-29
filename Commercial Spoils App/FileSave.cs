@@ -15,13 +15,15 @@ namespace Commercial_Spoils_App
         {
             try
             {
+                string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+                string[] result = userName.Split('\\');
                 string to = "DigitalGrp@khprint.com";
                 //string to = "jelder@khprint.com";
-                string from = "jelder@khprint.com";
+                string from = result[1] + "@khprint.com";
 
                 MailMessage message = new MailMessage(from, to);
 
-                //message.CC.Add("MailRoomGrp@khprint.com");
+                message.CC.Add("MailRoomGrp@khprint.com");
                 string server = "mail.khprint.com";
                 SmtpClient client = new SmtpClient(server);
 
