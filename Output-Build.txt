@@ -1,0 +1,14 @@
+﻿1>------ Build started: Project: Commercial Spoils App, Configuration: Debug Any CPU ------
+1>C:\Users\jelder\Desktop\Visual Studio JJE\Commercial Spoils App\Commercial Spoils App\MainWindow.xaml.cs(123,18,123,30): warning CS0219: The variable 'scanAddSpoil' is assigned but its value is never used
+1>C:\Users\jelder\Desktop\Visual Studio JJE\Commercial Spoils App\Commercial Spoils App\MainWindow.xaml.cs(124,18,124,33): warning CS0219: The variable 'scanRemoveSpoil' is assigned but its value is never used
+1>C:\Users\jelder\Desktop\Visual Studio JJE\Commercial Spoils App\Commercial Spoils App\MainWindow.xaml.cs(125,18,125,30): warning CS0219: The variable 'exitScanMode' is assigned but its value is never used
+1>C:\Users\jelder\Desktop\Visual Studio JJE\Commercial Spoils App\Commercial Spoils App\MainWindow.xaml.cs(126,18,126,31): warning CS0219: The variable 'insertionScan' is assigned but its value is never used
+1>  Commercial Spoils App -> C:\Users\jelder\Desktop\Visual Studio JJE\Commercial Spoils App\Commercial Spoils App\bin\Debug\Commercial Spoils App.exe
+Building Commercial Spoils App...
+2>------ Publish started: Project: Commercial Spoils App, Configuration: Debug Any CPU ------
+Connecting to '\\Cedar\odda\Published by Justin\Commercial Spoils\'...
+Publishing files...
+Publish success.
+\\Cedar\odda\Published by Justin\Commercial Spoils\
+========== Build: 1 succeeded, 0 failed, 1 up-to-date, 0 skipped ==========
+========== Publish: 1 succeeded, 0 failed, 0 skipped ==========
