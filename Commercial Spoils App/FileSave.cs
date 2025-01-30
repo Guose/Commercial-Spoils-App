@@ -11,64 +11,68 @@ namespace Commercial_Spoils_App
 {
     class FileSave
     {
-        internal static void SendEmail_Outlook(FileInfo fi, bool newMailing, int recordCount)
-        {
-            try
-            {
-                string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-                string[] result = userName.Split('\\');
-                string to = "DigitalGrp@khprint.com";
-                //string to = "jelder@khprint.com";
-                string from = result[1] + "@khprint.com";
+        //internal static void SendEmail_Outlook(FileInfo fi, bool newMailing, int recordCount)
+        //{
+        //    try
+        //    {
+        //        string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        //        string[] result = userName.Split('\\');
+        //        string to = "DigitalGrp@khprint.com";
+        //        //string to = "jelder@khprint.com";
+        //        string from = result[1] + "@khprint.com";
 
-                MailMessage message = new MailMessage(from, to);
+        //        MailMessage message = new MailMessage(from, to);
 
-                message.CC.Add("MailRoomGrp@khprint.com");
-                string server = "mail.khprint.com";
-                SmtpClient client = new SmtpClient(server);
+        //        message.CC.Add("MailRoomGrp@khprint.com");
+        //        string server = "mail.khprint.com";
+        //        SmtpClient client = new SmtpClient(server);
 
-                //Subject Line
-                message.Subject = fi.Name + "  is ready for processing.";                               
+        //        //Subject Line
+        //        message.Subject = fi.Name + "  is ready for processing.";                               
 
-                if (newMailing)
-                {
-                    message.To.Add("DPGroup@khprint.com");
+        //        if (newMailing)
+        //        {
+        //            message.To.Add("DPGroup@khprint.com");
 
-                    //email body goes here
-                    message.Body = String.Format("Please process file: {0}\n\nRecord Count: {1}\n\nAs a NEW MAILING\n\nLocated at: {2}",fi.Name.ToString(), recordCount, fi.Directory.ToString());
-                }
-                else
-                {
-                    //email body goes here
-                    message.Body = String.Format("Please process file: {0}\n\nRecord Count: {1}\n\nFor REPRINTING\n\nLocated at: {2}", fi.Name.ToString(), recordCount, fi.Directory.ToString());
-                }
+        //            //email body goes here
+        //            message.Body = String.Format("Please process file: {0}\n\nRecord Count: {1}\n\nAs a NEW MAILING\n\nLocated at: {2}",fi.Name.ToString(), recordCount, fi.Directory.ToString());
+        //        }
+        //        else
+        //        {
+        //            //email body goes here
+        //            message.Body = String.Format("Please process file: {0}\n\nRecord Count: {1}\n\nFor REPRINTING\n\nLocated at: {2}", fi.Name.ToString(), recordCount, fi.Directory.ToString());
+        //        }
 
-                client.UseDefaultCredentials = true;
-                client.Send(message);
+        //        client.UseDefaultCredentials = true;
+        //        client.Send(message);
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+        //}
 
 
         public static DataTable SortAscending(string columnName, DataTable dt)
         {
             DataTable dtAsc = dt.Clone();
             dtAsc.Columns[columnName].DataType = Type.GetType("System.Int32");
+
             foreach (DataRow dr in dt.Rows)
             {
                 dtAsc.ImportRow(dr);
             }
+
             dtAsc.AcceptChanges();
+
             if (dtAsc.Rows.Count > 0)
             {
                 DataView dv = dtAsc.DefaultView;
                 dv.Sort = columnName;
                 dtAsc = dv.ToTable();
             }
+
             return dtAsc;
         }
 
@@ -91,18 +95,20 @@ namespace Commercial_Spoils_App
                 }
                 result.AppendLine();
             }
-            StreamWriter objWriter = new StreamWriter(newFilename);
-            objWriter.WriteLine(header);
-            objWriter.WriteLine(result.ToString());
-            objWriter.Close();
+            using (StreamWriter objWriter = new StreamWriter(newFilename))
+            {
+                objWriter.WriteLine(header);
+                objWriter.WriteLine(result.ToString());
+                objWriter.Close();
+            }            
             return newFilename;
         }
 
-        public static string AddSuffix(string filename, string suffix, bool newFileCreated)
+        public static string AddSuffix(string path, string suffix, bool newFileCreated)
         {
             
-            string fDir = Path.GetDirectoryName(filename);
-            string fName = Path.GetFileNameWithoutExtension(filename);
+            string fDir = Path.GetDirectoryName(path);
+            string fName = Path.GetFileNameWithoutExtension(path);
             string fExt = suffix; //Path.GetExtension(filename);
             int n = 1;
             string spoils = "_SPOILS";
@@ -111,15 +117,15 @@ namespace Commercial_Spoils_App
             {
                 do
                 {
-                    filename = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
+                    path = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
                 }
-                while (File.Exists(filename));
+                while (File.Exists(path));
             }
             else
             {
-                filename = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
+                path = Path.Combine(fDir, String.Format("{0}{1}({2}){3}", fName, spoils, (n++), fExt));
             }
-            return filename;
+            return path;
         }
 
         public static DataTable RemoveDuplicateRows(DataTable dTable, string colName)

@@ -146,7 +146,7 @@ namespace Commercial_Spoils_App
 
                 xclSheet = xclWBook.Worksheets[1];
 
-                AddDataToExcel(FirstNumber, LastNumber);
+                AppendDataToExcel(FirstNumber, LastNumber);
 
             }
             catch (Exception ex)
@@ -160,7 +160,7 @@ namespace Commercial_Spoils_App
 
         }
 
-        private void AddDataToExcel(long firstNum, long lastNum)
+        private void AppendDataToExcel(long firstNum, long lastNum)
         {
             long count = 1;
 

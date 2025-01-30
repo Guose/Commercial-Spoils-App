@@ -1,15 +1,15 @@
-﻿using System;
+﻿using SpoilsReportData;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.IO;
-using System.Data;
-using System.IO.Ports;
-using SpoilsReportData;
 
 namespace Commercial_Spoils_App
 {
@@ -23,26 +23,26 @@ namespace Commercial_Spoils_App
             InitializeComponent();
             StartUpView();
             GetCOMPortName();
-            
+
             DragEnter += new DragEventHandler(Form1_DragEnter);
-            Drop += new DragEventHandler(Form1_DragDrop);            
+            Drop += new DragEventHandler(Form1_DragDrop);
         }
 
         private DataTable dt = new DataTable();
         private DataTable dt2 = new DataTable();
         private ExcelFile ex = new ExcelFile();
-        
+
 
         #region DragNDrop
 
         void Form1_DragEnter(object sender, DragEventArgs e)
-        {   
+        {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effects = DragDropEffects.Copy;
             lblFileLoaded.Visibility = Visibility.Hidden;
         }
 
-        
+
         void Form1_DragDrop(object sender, DragEventArgs e)
         {
             Cursor = Cursors.AppStarting;
@@ -63,17 +63,16 @@ namespace Commercial_Spoils_App
             lblScannerCOM.Visibility = Visibility.Visible;
             lblDragFileHere.Visibility = Visibility.Hidden;
             lblFileLoaded.Visibility = Visibility.Visible;
+
             dt = Seperator.DataFromTextFile(lblPath.Content.ToString(), '|');
             dt2 = dt.Clone();
-            ex = new ExcelFile(lblPath.Content.ToString());
 
+            ex = new ExcelFile(lblPath.Content.ToString());
             ex.CreateExcelFile();
+
             Application.Current.MainWindow.Width = 1250;
             Cursor = Cursors.Arrow;
         }
-        #endregion DragNDrop
-
-        #region ScanningMethods
         public void SelectScanningMode(string scanType)
         {
             bool scanAddSpoil = false;
@@ -81,18 +80,23 @@ namespace Commercial_Spoils_App
             bool exitScanMode = false;
             bool insertionScan = false;
 
-            if (scanType == "scanAddSpoil")
-                scanAddSpoil = true;
+            switch (scanType)
+            {
+                case "scanAddSpoil":
+                    scanAddSpoil = true;
+                    break;
+                case "scanRemoveSpoil":
+                    scanRemoveSpoil = true;
+                    break;
+                case "exitScanMode":
+                    exitScanMode = true;
+                    break;
+                case "insertionScan":
+                    insertionScan = true;
+                    break;
+            }
 
-            if (scanType == "scanRemoveSpoil")
-                scanRemoveSpoil = true;
-
-            if (scanType == "exitScanMode")
-                exitScanMode = true;
-
-            if (scanType == "insertionScan")
-                insertionScan = true;
-
+            ConnectToRFIDReader();
             ConnectToScanner();
         }
 
@@ -105,14 +109,42 @@ namespace Commercial_Spoils_App
 
         public List<string> comPorts = new List<string>();
 
+        private void ConnectToRFIDReader()
+        {
+            List<ComPort.ComPortInfo> availableRFIDPorts = new List<ComPort.ComPortInfo>(ComPort.ComPortInfo.GetRFIDComPortsInfo());
+
+            if (availableRFIDPorts.Count == 0)
+            {
+                Console.WriteLine("No RFID Reader detected.");
+                return;
+            }
+
+            Console.WriteLine("Available RFID Readers:");
+            foreach (var port in availableRFIDPorts)
+            {
+                Console.WriteLine($"{port.Description} ({port.Name})");
+            }
+
+            string selectedPort = availableRFIDPorts[0].Name;
+
+            RFIDReader rfidReader = new RFIDReader(selectedPort);
+            rfidReader.OnTagRead += tag => Console.WriteLine($"Scanned RFID Tag: {tag}");
+
+            rfidReader.Open();
+
+            Console.WriteLine("Listening for RFID scans... Press Enter to exit.");
+            Console.ReadLine();
+
+            rfidReader.Close();
+        }
 
         private void GetCOMPortName()
-        {                
-                foreach (ComPort.ComPortInfo comPort in ComPort.ComPortInfo.GetComPortsInfo())
-                {                    
-                    comPorts.Add(string.Format("{0}-{1}", comPort.Name, comPort.Description));
-                }
-                cboComPort.ItemsSource = comPorts;            
+        {
+            foreach (ComPort.ComPortInfo comPort in ComPort.ComPortInfo.GetComPortsInfo())
+            {
+                comPorts.Add(string.Format("{0}-{1}", comPort.Name, comPort.Description));
+            }
+            cboComPort.ItemsSource = comPorts;
         }
 
         private void ConnectToScanner()
@@ -122,7 +154,7 @@ namespace Commercial_Spoils_App
                 temp.Close();
                 temp.DataReceived -= temp_DataReceived;
             }
-            catch {}          
+            catch { }
 
             try
             {
@@ -158,9 +190,9 @@ namespace Commercial_Spoils_App
                 }
                 else
                 { }
-            }            
+            }
         }
-                
+
 
         private void temp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -178,7 +210,7 @@ namespace Commercial_Spoils_App
                 }
                 else
                 {
-                    if (isFirstScanCaptured == false)
+                    if (!isFirstScanCaptured)
                     {
                         isRangeFirstScan = true;
                         Dispatcher.BeginInvoke((Action)(() => txtFirstNum.Text = dataRead));
@@ -226,7 +258,7 @@ namespace Commercial_Spoils_App
             ChangeVisibility(false);
             stkSingle.Visibility = Visibility.Visible;
             txtSingleNum.Focus();
-            SelectScanningMode("scanAddSpoil");
+            //SelectScanningMode("scanAddSpoil");
         }
 
         private void btnRange_Click(object sender, RoutedEventArgs e)
@@ -235,11 +267,11 @@ namespace Commercial_Spoils_App
             ChangeVisibility(false);
             stkRange.Visibility = Visibility.Visible;
             txtFirstNum.Focus();
-            SelectScanningMode("scanAddSpoil");
+            //SelectScanningMode("scanAddSpoil");
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
-        {            
+        {
             ClearAllData();
             Close();
         }
@@ -249,7 +281,7 @@ namespace Commercial_Spoils_App
             string path = lblPath.Content.ToString();
             string header = lblHeader.Content.ToString();
             DataTable dtAsc = dt2.Clone();
-            SpoilsData spoilsData = null;
+            SpoilsRptData spoilsData = null;
 
             try
             {
@@ -276,13 +308,16 @@ namespace Commercial_Spoils_App
 
                 string newFilename = FileSave.SaveSpoilsFile(path, dtAsc, header);
 
+                spoilsData = new SpoilsRptData(dtAsc);
+
                 var lines = File.ReadAllLines(newFilename);
                 File.WriteAllLines(newFilename, lines.Take(lines.Length - 1).ToArray());
                 int recordCount = dtAsc.Rows.Count;
                 bool isNewMailing = false;
-                spoilsData = new SpoilsData(dtAsc);
 
-                MessageBoxResult processQuestion = MessageBox.Show("Are you processing as new mailing?", "??? IS THIS A NEW MAILING ???", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                MessageBoxResult processQuestion = MessageBox.Show(
+                    "Are you processing as new mailing?", "??? IS THIS A NEW MAILING ???",
+                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
                 if (processQuestion != MessageBoxResult.Cancel)
                 {
@@ -293,7 +328,7 @@ namespace Commercial_Spoils_App
                     }
 
                     FileInfo emailFile = new FileInfo(newFilename);
-                    FileSave.SendEmail_Outlook(emailFile, isNewMailing, recordCount);
+                    //FileSave.SendEmail_Outlook(emailFile, isNewMailing, recordCount);
                     MessageBox.Show(recordCount + " records have been saved!  \n\nEmail has been sent.", "'" + recordCount + "'" + " - RECORD(s) EXPORTED", MessageBoxButton.OK);
                 }
                 else
@@ -310,7 +345,7 @@ namespace Commercial_Spoils_App
             {
                 ClearAllData();
                 ChangeVisibility(true);
-                
+
             }
         }
 
@@ -383,7 +418,7 @@ namespace Commercial_Spoils_App
                 else
                 {
                     MessageBox.Show("Length of characters exceed allowed amount ", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                }                
+                }
             }
             catch (Exception ex)
             {
@@ -398,7 +433,7 @@ namespace Commercial_Spoils_App
 
         void GetCountOfDataGrid()
         {
-            int count = spoilsGrid.Items.Count -1;
+            int count = spoilsGrid.Items.Count - 1;
             lblDisplayCount.Content = count.ToString();
         }
 
@@ -466,14 +501,13 @@ namespace Commercial_Spoils_App
             stkSingle.Visibility = Visibility.Hidden;
         }
 
-
         private DataTable GetBarcode(string ColumnToSearch, long firstNum, long lastNum)
         {
             //Check Condition for which record was entered first - big number or small number
             long fNumScanned;
             long lNumScanned;
             string IdUniqueToFind = string.Empty;
-            bool doMainBreak = false;  
+            bool doMainBreak = false;
 
             if (lastNum < firstNum)
             {
@@ -487,66 +521,65 @@ namespace Commercial_Spoils_App
             }
 
             ex.OpenExcelFile(fNumScanned, lNumScanned);
-            
+
             lNumScanned = lNumScanned + 1;
 
-                if (wasScanned == false)
+            if (wasScanned == false)
+            {
+                IdUniqueToFind = fNumScanned.ToString();
+                foreach (DataColumn dc in dt.Columns)
                 {
-                    IdUniqueToFind = fNumScanned.ToString();
-                    foreach (DataColumn dc in dt.Columns)
+                    if (dc.ColumnName.Contains("SEQUENCE") || dc.ColumnName.Contains("Seq") || dc.ColumnName.Contains("Count") || dc.ColumnName.Contains("SEQ"))
                     {
-                        if (dc.ColumnName.Contains("SEQUENCE") || dc.ColumnName.Contains("Seq") || dc.ColumnName.Contains("Count") || dc.ColumnName.Contains("SEQ"))
+                        ColumnToSearch = dc.ColumnName.ToString();
+
+                        foreach (DataRow drv in dt.Rows)
                         {
-                            ColumnToSearch = dc.ColumnName.ToString();
-
-                            foreach (DataRow drv in dt.Rows)
+                            if (drv[ColumnToSearch].ToString() == fNumScanned.ToString())
                             {
-                                if (drv[ColumnToSearch].ToString() == fNumScanned.ToString())
+                                dt2.Rows.Add(drv.ItemArray);
+
+                                fNumScanned++;
+                                if (fNumScanned >= lNumScanned)
                                 {
-                                    dt2.Rows.Add(drv.ItemArray);
-
-
-                                    fNumScanned++;
-                                    if (fNumScanned >= lNumScanned)
-                                    {
-                                        doMainBreak = true;
-                                        break;
-                                    }
+                                    doMainBreak = true;
+                                    break;
                                 }
                             }
-                            if (doMainBreak)
-                                break;
                         }
-                    }
-                }
-                else
-                {
-                    IdUniqueToFind = fNumScanned.ToString().PadLeft(10, '0');
-                    foreach (DataColumn dc in dt.Columns)
-                    {
                         if (doMainBreak)
                             break;
-                        if (dc.ColumnName.Contains("BarCode") || dc.ColumnName.Contains("BARCODE") || dc.ColumnName.Contains("BALLOTBC") || dc.ColumnName.Contains("LETTER_2D")) //
-                        {
-                            ColumnToSearch = dc.ColumnName.ToString();
-                            foreach (DataRow drv in dt.Rows)
-                            {
-                                if (drv[ColumnToSearch].ToString() == fNumScanned.ToString().PadLeft(10, '0'))
-                                {
-                                    dt2.Rows.Add(drv.ItemArray);
-                                    fNumScanned++;
-                                    if (fNumScanned >= lNumScanned)
-                                    {
-                                        doMainBreak = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (doMainBreak)
-                                break;
-                        }
                     }
                 }
+            }
+            else
+            {
+                IdUniqueToFind = fNumScanned.ToString().PadLeft(10, '0');
+                foreach (DataColumn dc in dt.Columns)
+                {
+                    if (doMainBreak)
+                        break;
+                    if (dc.ColumnName.Contains("BarCode") || dc.ColumnName.Contains("BARCODE") || dc.ColumnName.Contains("BALLOTBC") || dc.ColumnName.Contains("LETTER_2D")) //
+                    {
+                        ColumnToSearch = dc.ColumnName.ToString();
+                        foreach (DataRow drv in dt.Rows)
+                        {
+                            if (drv[ColumnToSearch].ToString() == fNumScanned.ToString().PadLeft(10, '0'))
+                            {
+                                dt2.Rows.Add(drv.ItemArray);
+                                fNumScanned++;
+                                if (fNumScanned >= lNumScanned)
+                                {
+                                    doMainBreak = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (doMainBreak)
+                            break;
+                    }
+                }
+            }
             return dt2;
         }
 
@@ -563,17 +596,17 @@ namespace Commercial_Spoils_App
         {
             if (e.Key == Key.Enter)
             {
-               txtLastNum.SelectionStart = 0;
-               txtLastNum.SelectionLength = txtLastNum.Text.Length;
+                txtLastNum.SelectionStart = 0;
+                txtLastNum.SelectionLength = txtLastNum.Text.Length;
                 wasScanned = false;
-                txtLastNum.Focus();                
+                txtLastNum.Focus();
             }
         }
 
         private void txtLastNum_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-            {                
+            {
                 txtFirstNum.SelectionStart = 0;
                 txtFirstNum.SelectionLength = txtFirstNum.Text.Length;
             }
@@ -609,7 +642,7 @@ namespace Commercial_Spoils_App
         }
 
         private void txtFindRec_KeyUp(object sender, KeyEventArgs e)
-       {
+        {
             try
             {
                 if (e.Key == Key.Enter)
@@ -621,7 +654,7 @@ namespace Commercial_Spoils_App
                         {
                             spoilsGrid.SelectedIndex = spoilsGrid.Items.IndexOf(row);
                             spoilsGrid.ScrollIntoView(row);
-                            spoilsGrid.SelectedItem = spoilsGrid.Items.IndexOf(row);                            
+                            spoilsGrid.SelectedItem = spoilsGrid.Items.IndexOf(row);
                             break;
                         }
                     }
@@ -650,7 +683,7 @@ namespace Commercial_Spoils_App
         }
 
         private void cboComPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {            
+        {
             Properties.Settings.Default.PortName = cboComPort.SelectedItem.ToString();
             Properties.Settings.Default.Save();
         }
